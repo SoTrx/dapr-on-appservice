@@ -6,11 +6,11 @@ DAPR_VERSION=1.5.0
 # Paths shannanigans 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 PROJECT_ROOT := $(dir $(MKFILE_PATH))
-PODS_ROOT := ${PROJECT_ROOT}/pods/hello-docker-compose/
+SRC_ROOT := ${PROJECT_ROOT}/src
 
 # Local demo variables
-LOCAL_COMPONENTS_PATH := ${PROJECT_ROOT}/pods/hello-docker-compose/components-local
-LOCAL_CONFIG_PATH := ${PROJECT_ROOT}/pods/hello-docker-compose/config-local
+LOCAL_COMPONENTS_PATH := ${SRC_ROOT}/components-local
+LOCAL_CONFIG_PATH := ${SRC_ROOT}/config-local
 DEMO_NETWORK := meh
 DEMO_PLACEMENT_NAME := placement
 DEMO_REDIS_NAME := redis
@@ -21,17 +21,17 @@ build: b-satcar b-node b-python
 
 # Builds the generic sidecar to be attached to every app
 b-satcar:
-	cd ${PODS_ROOT}/satcars/satcar &&\
+	cd ${SRC_ROOT}/using-satcars/satcar &&\
 	docker build --build-arg OPTIMIZE=${OPTIMIZE} --build-arg DAPR_VERSION=${DAPR_VERSION} -t satcar .
 
 # Builds the node subscriber app
 b-node:
-	cd ${PODS_ROOT}/satcars/node &&\
+	cd ${SRC_ROOT}/using-satcars/node &&\
 	docker build --build-arg OPTIMIZE=${OPTIMIZE} -t nodeapp .
 
 # Builds the python publisher app
 b-python:
-	cd ${PODS_ROOT}/satcars/python &&\
+	cd ${SRC_ROOT}/using-satcars/python &&\
 	docker build --build-arg OPTIMIZE=${OPTIMIZE} -t pythonapp .
 
 # Starts the demo app
