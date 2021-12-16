@@ -1,0 +1,10 @@
+.dockerfiles
+*.override.*
+deploy/.terraform
+pods/hello-docker-compose/embedded-dapr
+pods/hello-docker-compose/multi-container
+pods/hello-docker-compose/placement
+**/notes.txt
+**/node_modules
+**/__pycache__
+**/*.tfstate*
