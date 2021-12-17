@@ -29,5 +29,5 @@ jobs:
 
       - name : Build and push images
         run : |
-           apt install -y make
+           DEBIAN_FRONTEND=noninteractive sudo apt install -y make
            make push DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
