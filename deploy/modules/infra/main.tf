@@ -5,7 +5,7 @@ provider "azurerm" {
 # Ressource Group
 resource "azurerm_resource_group" "rg" {
   name     = "${var.global_prefix}-rg"
-  location = "West Europe"
+  location = "${var.location}"
 }
 
 # Storage account
@@ -187,24 +187,24 @@ resource "azurerm_container_group" "consul" {
 }
 
 # Create the redis instance
-# resource "azurerm_container_group" "redis" {
-#   name                = "redis"
-#   location            = azurerm_resource_group.rg.location
-#   resource_group_name = azurerm_resource_group.rg.name
-#   ip_address_type     = "private"
-#   network_profile_id  = azurerm_network_profile.redisNic.id
-#   os_type             = "Linux"
+resource "azurerm_container_group" "redis" {
+  name                = "redis"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_address_type     = "private"
+  network_profile_id  = azurerm_network_profile.redisNic.id
+  os_type             = "Linux"
 
-#   container {
-#     name   = "placement"
-#     image  = "redis"
-#     cpu    = "0.5"
-#     memory = "1.5"
+  container {
+    name   = "placement"
+    image  = "redis"
+    cpu    = "0.5"
+    memory = "1.5"
 
-#     ports {
-#       port     = 6379
-#       protocol = "TCP"
-#     }
-#   }
-# }
+    ports {
+      port     = 6379
+      protocol = "TCP"
+    }
+  }
+}
 

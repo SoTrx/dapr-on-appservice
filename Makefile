@@ -3,6 +3,8 @@ OPTIMIZE=0
 # Dapr runtime version to use
 DAPR_VERSION=1.5.0
 
+DOCKERHUB_USERNAME=
+
 # Paths shannanigans 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 PROJECT_ROOT := $(dir $(MKFILE_PATH))
@@ -33,6 +35,22 @@ b-node:
 b-python:
 	cd ${SRC_ROOT}/using-satcars/python &&\
 	docker build --build-arg OPTIMIZE=${OPTIMIZE} -t pythonapp .
+
+# Build all the custom containers
+push: p-satcar p-node p-python
+
+p-satcar: b-satcar
+	docker tag satcar ${DOCKERHUB_USERNAME}/dapr-on-ase-satcar 
+	docker push ${DOCKERHUB_USERNAME}/dapr-on-ase-satcar 
+
+p-node: b-node
+	docker tag nodeapp ${DOCKERHUB_USERNAME}/dapr-on-ase-nodeapp 
+	docker push ${DOCKERHUB_USERNAME}/dapr-on-ase-nodeapp 
+
+p-python: b-python
+	docker tag pythonapp ${DOCKERHUB_USERNAME}/dapr-on-ase-pythonapp 
+	docker push ${DOCKERHUB_USERNAME}/dapr-on-ase-pythonapp 
+
 
 # Starts the demo app
 run: build start-external 
