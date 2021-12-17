@@ -30,4 +30,4 @@ jobs:
       - name : Build and push images
         run : |
            DEBIAN_FRONTEND=noninteractive sudo apt install -y make
-           make push DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+           make push DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} BUILD_ENV="DOCKER_BUILDKIT=1"

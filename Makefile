@@ -4,6 +4,7 @@ OPTIMIZE=0
 DAPR_VERSION=1.5.0
 
 DOCKERHUB_USERNAME=
+BUILD_ENV=
 
 # Paths shannanigans 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -24,17 +25,17 @@ build: b-satcar b-node b-python
 # Builds the generic sidecar to be attached to every app
 b-satcar:
 	cd ${SRC_ROOT}/using-satcars/satcar &&\
-	docker build --build-arg OPTIMIZE=${OPTIMIZE} --build-arg DAPR_VERSION=${DAPR_VERSION} -t satcar .
+	${BUILD_ENV} docker build --build-arg OPTIMIZE=${OPTIMIZE} --build-arg DAPR_VERSION=${DAPR_VERSION} -t satcar .
 
 # Builds the node subscriber app
 b-node:
 	cd ${SRC_ROOT}/using-satcars/node &&\
-	docker build --build-arg OPTIMIZE=${OPTIMIZE} -t nodeapp .
+	${BUILD_ENV} docker build --build-arg OPTIMIZE=${OPTIMIZE} -t nodeapp .
 
 # Builds the python publisher app
 b-python:
 	cd ${SRC_ROOT}/using-satcars/python &&\
-	docker build --build-arg OPTIMIZE=${OPTIMIZE} -t pythonapp .
+	${BUILD_ENV} docker build --build-arg OPTIMIZE=${OPTIMIZE} -t pythonapp .
 
 # Build all the custom containers
 push: p-satcar p-node p-python
