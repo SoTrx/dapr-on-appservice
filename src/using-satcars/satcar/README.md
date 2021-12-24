@@ -6,7 +6,7 @@ Dapr is normally using the localhost interface to communicate with the main proc
 
 This pseudo-sidecar is not really to the main process side anymore, this is more of a "satellite process", hence **satcar**.
 
-![Satcar explanation](../../../../assets/images/satcar-principle.svg)
+![Satcar explanation](../../../assets/images/satcar-principle.svg)
 
 
 ## Configuration
@@ -17,8 +17,6 @@ This container is **requiring** the following env variables :
 - APP_PORT: Main process exposed port. This is most likely 80 or 443 if the main process is hosted in an AppService.  
 - PLACEMENT_HOST: [Dapr placement service](https://docs.dapr.io/concepts/dapr-services/placement/) URL/IP. This is mandatory to use actors.
 - PLACEMENT_HOST: Dapr placement service port.
-
-@TBD : PLACEMENT_HOST and PLACEMENT_PORT shouldn't be mandatory
 
 The process will abort if any of these aren't defined at runtime.
 
@@ -31,7 +29,17 @@ The following ports must be opened on the container
 
 ## Using config and bindings
 
-@TBD : components and config as a volume 
+Both DAPR's config and bindings can be provided as volumes.
+
+- **Bindings** can be provided in the volume mount /components
+- **Config** can be provided in the volume mount /config
+
+Example of running a satcar:
+
+```sh
+    docker run -d --name satcarnode --network=${DEMO_NETWORK} -e PLACEMENT_HOST=${DEMO_PLACEMENT_NAME} -e PLACEMENT_PORT=50006 -e APP_ID=nodeapp -e APP_PORT=80 -e APP_HOST=nodeapp -v ${LOCAL_COMPONENTS_PATH}:/components -v ${LOCAL_CONFIG_PATH}:/config satcar
+
+```
 
 
 

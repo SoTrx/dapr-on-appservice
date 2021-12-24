@@ -22,9 +22,9 @@ RUN if [[ "$OPTIMIZE" -eq 1 ]]; then strip /app/daprd && upx --best --lzma /app/
 FROM alpine:latest
 WORKDIR /app
 COPY nginx.conf /etc/nginx/nginx.conf.template
-COPY config.yaml /config/config.yaml
+# COPY config.yaml /config/config.yaml
 COPY entrypoint.sh /app/
-#COPY components /components
+# COPY components /components
 # gettext is the apk package containing envsubst used in the entrypoint
 RUN apk add --no-cache gettext nginx
 COPY --from=dapr-downloader /app/daprd .
