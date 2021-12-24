@@ -3,8 +3,8 @@ retryNginx() {
     nginx
     while [ $? -ne 0 ]; do
         echo "Restarting nginx"
-        nginx
         sleep 5
+        nginx
     done
 }
 
