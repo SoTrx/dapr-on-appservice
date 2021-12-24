@@ -106,7 +106,7 @@ resource "azurerm_container_group" "satcar-python" {
 
   container {
     name   = "satcar-python"
-    image  = "dapr-on-ase-satcar"
+    image  = "dockerutils/dapr-on-ase-satcar"
     cpu    = "1"
     memory = "1.5"
 
@@ -214,7 +214,7 @@ resource "azurerm_container_group" "satcar-node" {
 
   container {
     name   = "satcar-node"
-    image  = "dapr-on-ase-satcar"
+    image  = "dockerutils/dapr-on-ase-satcar"
     cpu    = "1"
     memory = "1.5"
 
