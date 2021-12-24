@@ -32,5 +32,5 @@ echo "$(date) Container started" >> /home/LogFiles/dotnet_$WEBSITE_ROLE_INSTANCE
 # Start the app !
 echo "Starting default app..."
 echo "CONNECTING TO ${PLACEMENT_HOST:-localhost}:${PLACEMENT_PORT:-50006} with APP_ID ${APP_ID:-nodeapp}"
-node /app/app.js
+/app/start.sh
 
