@@ -5,7 +5,7 @@ provider "azurerm" {
 # Ressource Group
 resource "azurerm_resource_group" "rg" {
   name     = "${var.global_prefix}-rg"
-  location = "${var.location}"
+  location = var.location
 }
 
 # Storage account
@@ -32,15 +32,15 @@ resource "azurerm_storage_share" "st_config_share" {
   quota                = 50
 }
 
-# Container registry
-resource "azurerm_container_registry" "acr" {
-  # An ACR name cannot contains hyphens, so let's sanitize it
-  name                = join("", split("-", "${var.global_prefix}-acr"))
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  sku                 = "Standard"
-  admin_enabled       = true
-}
+# # Container registry
+# resource "azurerm_container_registry" "acr" {
+#   # An ACR name cannot contains hyphens, so let's sanitize it
+#   name                = join("", split("-", "${var.global_prefix}-acr"))
+#   resource_group_name = azurerm_resource_group.rg.name
+#   location            = azurerm_resource_group.rg.location
+#   sku                 = "Standard"
+#   admin_enabled       = true
+# }
 
 # Vnet + Subnet
 resource "azurerm_virtual_network" "vnet" {
@@ -86,72 +86,60 @@ resource "azurerm_subnet" "containers" {
   }
 }
 
-resource "azurerm_network_profile" "redisNic" {
-  name                = "containers-subnet-redis-np"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
 
-  container_network_interface {
-    name = "containers-subnet-redis-np-nic"
-
-    ip_configuration {
-      name      = "containers-subnet-redis-np-ip"
-      subnet_id = azurerm_subnet.containers.id
-    }
-  }
-}
-
-resource "azurerm_network_profile" "placementNic" {
-  name                = "containers-subnet-placement-np"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  container_network_interface {
-    name = "containers-subnet-placement-np-nic"
-
-    ip_configuration {
-      name      = "containers-subnet-placement-np-ip"
-      subnet_id = azurerm_subnet.containers.id
-    }
-  }
-}
-
-# Create an external ASE
+# Create an external ASE...
 resource "azurerm_app_service_environment_v3" "ase" {
   name                = "${var.global_prefix}-ase"
   subnet_id           = azurerm_subnet.ase.id
   resource_group_name = azurerm_resource_group.rg.name
 }
 
-# Create the dapr placement instance
-resource "azurerm_container_group" "dapr-placement" {
-  name                = "dapr-placement"
+#...And its associated Isolated plan
+resource "azurerm_app_service_plan" "plan" {
+  name                       = "${var.global_prefix}-ase-plan"
+  resource_group_name        = azurerm_resource_group.rg.name
+  location                   = azurerm_resource_group.rg.location
+  kind                       = "Linux"
+  reserved                   = true
+  app_service_environment_id = azurerm_app_service_environment_v3.ase.id
+
+  sku {
+    tier = "IsolatedV2"
+    size = "I1V2"
+    # Workaround for https://github.com/hashicorp/terraform-provider-azurerm/issues/1708
+    capacity = 1
+  }
+}
+
+
+
+#########################################################
+# Consul (DNS resolver) deployment
+#########################################################
+
+# Create a network interface for Consul...
+resource "azurerm_network_profile" "consulNic" {
+  name                = "containers-subnet-consul-np"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  ip_address_type     = "private"
-  network_profile_id  = azurerm_network_profile.placementNic.id
-  os_type             = "Linux"
 
-  container {
-    name   = "placement"
-    image  = "daprio/dapr"
-    cpu    = "0.5"
-    memory = "1.5"
+  container_network_interface {
+    name = "containers-subnet-consul-np-nic"
 
-    ports {
-      port     = 50006
-      protocol = "TCP"
+    ip_configuration {
+      name      = "containers-subnet-consul-np-ip"
+      subnet_id = azurerm_subnet.containers.id
     }
   }
 }
 
-# Create the consul (DNS resolver) instance
+# ... And then create the instance
 resource "azurerm_container_group" "consul" {
   name                = "consul"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_address_type     = "private"
-  network_profile_id  = azurerm_network_profile.placementNic.id
+  network_profile_id  = azurerm_network_profile.consulNic.id
   os_type             = "Linux"
 
   container {
@@ -172,21 +160,31 @@ resource "azurerm_container_group" "consul" {
       port     = 8600
       protocol = "UDP"
     }
-
-    # volume {
-    #   name       = "logs"
-    #   mount_path = "/aci/logs"
-    #   read_only  = false
-    #   share_name = azurerm_storage_share.example.name
-
-    #   storage_account_name = azurerm_storage_account.example.name
-    #   storage_account_key  = azurerm_storage_account.example.primary_access_key
-    # }
   }
 
 }
 
-# Create the redis instance
+#########################################################
+# Redis (PubSub support) deployment
+#########################################################
+
+# Create a network interface for the Redis container group...
+resource "azurerm_network_profile" "redisNic" {
+  name                = "containers-subnet-redis-np"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  container_network_interface {
+    name = "containers-subnet-redis-np-nic"
+
+    ip_configuration {
+      name      = "containers-subnet-redis-np-ip"
+      subnet_id = azurerm_subnet.containers.id
+    }
+  }
+}
+
+# ... And then create the instance
 resource "azurerm_container_group" "redis" {
   name                = "redis"
   location            = azurerm_resource_group.rg.location
@@ -205,6 +203,49 @@ resource "azurerm_container_group" "redis" {
       port     = 6379
       protocol = "TCP"
     }
+  }
+}
+
+#########################################################
+# Dapr placement (Actors model support) deployment
+#########################################################
+# Create a network interface for the Dapr placement pod
+resource "azurerm_network_profile" "placementNic" {
+  name                = "containers-subnet-placement-np"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  container_network_interface {
+    name = "containers-subnet-placement-np-nic"
+
+    ip_configuration {
+      name      = "containers-subnet-placement-np-ip"
+      subnet_id = azurerm_subnet.containers.id
+    }
+  }
+}
+
+
+# ... And then create the instance
+resource "azurerm_container_group" "dapr-placement" {
+  name                = "dapr-placement"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_address_type     = "private"
+  network_profile_id  = azurerm_network_profile.placementNic.id
+  os_type             = "Linux"
+
+  container {
+    name   = "placement"
+    image  = "daprio/dapr"
+    cpu    = "0.5"
+    memory = "1.5"
+
+    ports {
+      port     = 50006
+      protocol = "TCP"
+    }
+    commands = ["./placement -port 50006"]
   }
 }
 
