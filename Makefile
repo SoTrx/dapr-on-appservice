@@ -37,7 +37,7 @@ b-python:
 	cd ${SRC_ROOT}/using-satcars/python &&\
 	${BUILD_ENV} docker build --build-arg OPTIMIZE=${OPTIMIZE} -t pythonapp .
 
-# Build all the custom containers
+# Push all the custom containers to the DockerHub
 push: p-satcar p-node p-python
 
 p-satcar: b-satcar

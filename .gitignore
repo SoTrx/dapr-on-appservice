@@ -1,11 +1,23 @@
+# Ignore docker artifacts
 .dockerfiles
+
+# Ignore terraform artifacts
 *.override.*
 deploy/.terraform
+deploy/modules/demo/**/*.yaml
+**/*.tfstate*
+**/*.terraform.lock.hcl
+
+# Ignore not ready subprojects
 src/embedded-dapr
 src/multi-container
 src/placement
 **/notes.txt
-**/node_modules
-**/__pycache__
-**/*.tfstate*
 src/using-satcars/lantency-measurer
+
+# Ignore node artifacts
+**/node_modules
+
+# Ignore pythonartifacts
+**/__pycache__
+
