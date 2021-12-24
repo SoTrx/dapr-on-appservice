@@ -1,9 +1,9 @@
-FROM node:8-alpine
+FROM node:17-alpine
 WORKDIR /app
 COPY . .
 COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
-RUN npm install &&\
+RUN npm install --only=production &&\
     apk add --no-cache openrc openssh nginx su-exec gettext &&\
     # As weird at it seems, the root password MUST be "Docker!" to allow \
     # for SSH connections from the Azure portal
