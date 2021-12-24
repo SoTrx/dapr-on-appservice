@@ -4,6 +4,7 @@ COPY . .
 COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
 RUN pip install requests gunicorn &&\
+    chmod ugo+x /app/entrypoint.sh &&\
     apk add --no-cache openrc openssh nginx su-exec gettext &&\
     # As weird at it seems, the root password MUST be "Docker!" to allow \
     # for SSH connections from the Azure portal
