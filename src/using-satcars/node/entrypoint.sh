@@ -31,5 +31,7 @@ echo "$(date) Container started" >> /home/LogFiles/dotnet_$WEBSITE_ROLE_INSTANCE
 
 # Start the app !
 echo "Starting default app..."
+# Workaround, sometimes the CI ignore the --chmod flag of the COPY instruction
+chmod u+x /app/entrypoint.sh
 /app/start.sh
 
