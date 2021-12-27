@@ -3,30 +3,40 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-const express = require("express");
-const bodyParser = require("body-parser");
-require("isomorphic-fetch");
+import express from "express";
+import bodyParser from "body-parser";
+import fetch from "isomorphic-fetch";
+import { env } from "process";
+
+// DAPR configuration
+/** Dapr is listening by default at localhost:3500 */
+const DAPR_HOST = env.NODE_DAPR_HTTP_HOST || "localhost";
+const DAPR_PORT = env.NODE_DAPR_HTTP_PORT || 3500;
+/** This is the name of the Dapr binding used */
+const STORE_NAME = `statestore`;
+const STORE_URL = `http://${DAPR_HOST}:${DAPR_PORT}/v1.0/state/${STORE_NAME}`;
+/** Port the web server should be listening to */
+const APP_PORT = 3000;
+
+/**
+ * EXPRESS ROUTER
+ */
 
 const app = express();
 app.use(bodyParser.json());
-
-const daprPort = process.env.DAPR_HTTP_PORT || 3500;
-const daprHost = process.env.DAPR_HTTP_HOST || "localhost";
-const stateStoreName = `statestore`;
-const stateUrl = `http://${daprHost}:${daprPort}/v1.0/state/${stateStoreName}`;
-const port = 3000;
-
+/**
+ * Retrieves and sends back the last recorded state
+ */
 app.get("/order", async (_req, response) => {
-  const res = await fetch(`${stateUrl}/order`);
+  const res = await fetch(`${STORE_URL}/order`);
   if (!res.ok) throw new Error("Could not get state.");
   const orders = await res.text();
   response.send(orders);
 });
 
-app.get("/echo", () => {
-    
-} )
-
+/**
+ * Persists a new state using Dapr
+ */
 app.post("/neworder", async (req, response) => {
   const data = req.body.data;
   const orderId = data.orderId;
@@ -39,7 +49,7 @@ app.post("/neworder", async (req, response) => {
     },
   ];
 
-  const res = await fetch(stateUrl, {
+  const res = await fetch(STORE_URL, {
     method: "POST",
     body: JSON.stringify(state),
     headers: {
@@ -51,9 +61,21 @@ app.post("/neworder", async (req, response) => {
   response.status(200).send();
 });
 
+/**
+ * Echo endpoint, use for benchmarking latency
+ */
+app.get("/echo", () => {
+  response.send(Math.random());
+});
+
+/**
+ * Global error handler
+ */
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send({ message: error.message });
 });
 
-app.listen(port, () => console.log(`Node App listening on port ${port}!`));
+app.listen(APP_PORT, () =>
+  console.log(`Node App listening on port ${APP_PORT}!`)
+);
