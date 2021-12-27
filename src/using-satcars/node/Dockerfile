@@ -29,8 +29,8 @@ ARG OPTIMIZE=0
 COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
 COPY entrypoint.sh /app/entrypoint.sh
-RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi;
-RUN apk add --no-cache openrc openssh nginx su-exec gettext &&\
+RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi && \
+    apk add --no-cache openrc openssh nginx su-exec gettext &&\
     # As weird at it seems, the root password MUST be "Docker!" to allow \
     # for SSH connections from the Azure portal
     echo "root:Docker!" | chpasswd &&\
