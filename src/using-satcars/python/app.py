@@ -7,8 +7,8 @@ import time
 import requests
 import os
 
-dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
-dapr_host = os.getenv("DAPR_HTTP_HOST", "localhost")
+dapr_port = os.getenv("MPROC_DAPR_HTTP_PORT", 3500)
+dapr_host = os.getenv("MPROC_DAPR_HTTP_HOST", "localhost")
 node_app_id = os.getenv("NODE_APP_ID", "nodeapp")
 dapr_url = "http://{}:{}/v1.0/invoke/{}/method/neworder".format(dapr_host, dapr_port, node_app_id)
 

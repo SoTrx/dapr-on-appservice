@@ -10,8 +10,8 @@ import { env } from "process";
 
 // DAPR configuration
 /** Dapr is listening by default at localhost:3500 */
-const DAPR_HOST = env.NODE_DAPR_HTTP_HOST || "localhost";
-const DAPR_PORT = env.NODE_DAPR_HTTP_PORT || 3500;
+const DAPR_HOST = env.MPROC_DAPR_HTTP_HOST || "localhost";
+const DAPR_PORT = env.MPROC_DAPR_HTTP_PORT || 3500;
 /** This is the name of the Dapr binding used */
 const STORE_NAME = `statestore`;
 const STORE_URL = `http://${DAPR_HOST}:${DAPR_PORT}/v1.0/state/${STORE_NAME}`;

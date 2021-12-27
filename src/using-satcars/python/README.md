@@ -1,6 +1,6 @@
-# Node app
+# Python app
 
-Simple app receiving a JSON payload and saving it in a state store.
+Infinite loop sending a new state each second
 
 ## API
 
@@ -12,6 +12,7 @@ Simple app receiving a JSON payload and saving it in a state store.
 This app **needs** the following env variables:
 
 - **DAPR_HOST** : IP/URL of the DAPR sidecar
+- **NODE_APP_ID** : Name of the node application as declared by Dapr. Default is nodeapp.
 
 These other env variables can be set but are not needed:
 
