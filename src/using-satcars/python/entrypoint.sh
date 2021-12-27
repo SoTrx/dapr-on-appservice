@@ -29,5 +29,6 @@ echo "$(date) Container started" >> /home/LogFiles/dotnet_$WEBSITE_ROLE_INSTANCE
 
 # Start the app !
 echo "Starting default app..."
+gunicorn -w 4 serv:app -b 0.0.0.0:8000 & 
 echo "CONNECTING TO ${PLACEMENT_HOST:-localhost}:${PLACEMENT_PORT:-50006} with APP_ID ${APP_ID:-pythonapp}"
 /app/start.sh
