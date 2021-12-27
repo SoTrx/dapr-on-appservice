@@ -49,9 +49,9 @@ The Python app wants to publish a state. It does so by calling the `/neworder` m
 This demo app is demonstrating both service invocation and the use of [bindings](https://docs.dapr.io/developing-applications/building-blocks/bindings/bindings-overview/). 
 
 There are 3 main components :
-- Nodeapp
-- Pythonapp
-- Satcar [see Readme](src/using-satcars/satcar/README)
+- Nodeapp [see Readme](/src/using-satcars/node)
+- Pythonapp [see Readme](/src/using-satcars/python)
+- Satcar [see Readme](/src/using-satcars/satcar)
 
 
 #### Running it locally
