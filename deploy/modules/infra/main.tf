@@ -32,16 +32,6 @@ resource "azurerm_storage_share" "st_config_share" {
   quota                = 50
 }
 
-# # Container registry
-# resource "azurerm_container_registry" "acr" {
-#   # An ACR name cannot contains hyphens, so let's sanitize it
-#   name                = join("", split("-", "${var.global_prefix}-acr"))
-#   resource_group_name = azurerm_resource_group.rg.name
-#   location            = azurerm_resource_group.rg.location
-#   sku                 = "Standard"
-#   admin_enabled       = true
-# }
-
 # Vnet + Subnet
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.global_prefix}-vnet"
@@ -107,11 +97,9 @@ resource "azurerm_app_service_plan" "plan" {
     tier = "IsolatedV2"
     size = "I1V2"
     # Workaround for https://github.com/hashicorp/terraform-provider-azurerm/issues/1708
-    capacity = 1
+    capacity = 2
   }
 }
-
-
 
 #########################################################
 # Consul (DNS resolver) deployment
