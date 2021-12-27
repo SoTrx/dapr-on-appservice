@@ -28,12 +28,11 @@ WORKDIR /app
 ARG OPTIMIZE=0
 COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
-COPY entrypoint.sh /app/entrypoint.sh
+COPY --chmod=555 --chown=root:root entrypoint.sh /app/entrypoint.sh
 RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi && \
     apk add --no-cache openrc openssh nginx su-exec gettext &&\
     # As weird at it seems, the root password MUST be "Docker!" to allow \
     # for SSH connections from the Azure portal
-    chmod ugo+x /app/entrypoint.sh &&\
     echo "root:Docker!" | chpasswd &&\
     # The runtime user, having no home dir nor password
     adduser -HD -s /bin/ash appuser &&\
