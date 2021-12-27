@@ -26,10 +26,6 @@ RUN chmod u+x /build/start.sh
 FROM alpine:latest as release 
 WORKDIR /app
 ARG OPTIMIZE=0
-USER root
-COPY nginx.conf /etc/nginx/nginx.conf.template
-COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
-COPY --chmod=500 --chown=root:root entrypoint.sh /app/
 RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi && \
     apk add --no-cache openrc openssh nginx su-exec gettext &&\
     # As weird at it seems, the root password MUST be "Docker!" to allow \
@@ -42,5 +38,8 @@ RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi && \
     ssh-keygen -A &&\
     cd -
 COPY --from=build /build/ .
+COPY nginx.conf /etc/nginx/nginx.conf.template
+COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
+COPY --chmod=555 --chown=root:root entrypoint.sh /app/
 EXPOSE 3000 50002 3500 80 2222 443
 ENTRYPOINT [ "/app/entrypoint.sh" ]
