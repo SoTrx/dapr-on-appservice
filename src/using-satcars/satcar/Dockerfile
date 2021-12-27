@@ -23,10 +23,11 @@ FROM alpine:latest
 WORKDIR /app
 COPY nginx.conf /etc/nginx/nginx.conf.template
 # COPY config.yaml /config/config.yaml
-COPY entrypoint.sh /app/
+COPY --chmod=500 --chown=root:root entrypoint.sh /app/
 # COPY components /components
 # gettext is the apk package containing envsubst used in the entrypoint
-RUN apk add --no-cache gettext nginx
-COPY --from=dapr-downloader /app/daprd .
+RUN apk add --no-cache gettext nginx su-exec &&\
+    adduser -HD -s /bin/ash appuser
+COPY --from=dapr-downloader --chmod=0500 --chown=appuser:appuser /app/daprd .
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 

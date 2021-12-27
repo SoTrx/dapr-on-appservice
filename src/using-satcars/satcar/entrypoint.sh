@@ -42,7 +42,7 @@ else
     echo "Placement service is ${PLACEMENT_HOST}:${PLACEMENT_PORT}"
 fi
 
-/app/daprd \
+su-exec appuser /app/daprd \
 -config /config/config.yaml \
 -dapr-internal-grpc-port "5555" \
 -components-path "/components" \
