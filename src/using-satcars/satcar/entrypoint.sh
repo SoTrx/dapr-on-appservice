@@ -1,6 +1,16 @@
 #!/usr/bin/env ash
 REQUIRED_ENV_VARS='APP_ID APP_HOST APP_PORT'
 
+retryNginx() {
+    nginx
+    while [ $? -ne 0 ]; do
+        echo "Restarting nginx"
+        sleep 5
+        nginx
+    done
+}
+
+
 # Check for all the env variable to be defined, die if not
 checkEnvVar () {
     for element in $REQUIRED_ENV_VARS
@@ -30,7 +40,7 @@ echo "Now starting satcar for ${APP_ID} (${APP_HOST}:${APP_PORT:-80}). Placement
 
 # Start the nginx reverse proxy
 envsubst '${APP_HOST} ${APP_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-nginx&
+retryNginx&
 
 # Only pass the placement service arg to Daprd if the variables are defined
 # Although this won't stop daprd, a lot of useless warning would be thrown otherwise
