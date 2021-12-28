@@ -37,7 +37,7 @@ RUN if [[ "$OPTIMIZE" -eq 0 ]]; then apk add nodejs;fi && \
     cd /etc/ssh && \
     ssh-keygen -A &&\
     cd -
-COPY --from=build /build/ .
+COPY --chown=appuser:appuser --from=build /build/ .
 COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=600 --chown=sshd:sshd sshd_config /etc/ssh/
 COPY --chmod=555 --chown=root:root entrypoint.sh /app/
