@@ -64,8 +64,8 @@ app.post("/neworder", async (req, response) => {
 /**
  * Echo endpoint, use for benchmarking latency
  */
-app.get("/echo", () => {
-  response.send(Math.random());
+app.get("/echo", (req, response) => {
+  response.status(200).send(req.body());
 });
 
 /**
