@@ -233,7 +233,7 @@ resource "azurerm_container_group" "dapr-placement" {
       port     = 50006
       protocol = "TCP"
     }
-    commands = ["./placement -port 50006"]
+    commands = ["./placement", "-port", "50006"]
   }
 }
 
