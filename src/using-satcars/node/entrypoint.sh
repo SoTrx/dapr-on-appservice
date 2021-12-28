@@ -31,5 +31,5 @@ echo "$(date) Container started" >> /home/LogFiles/dotnet_$WEBSITE_ROLE_INSTANCE
 
 # Start the app !
 echo "Starting default app..."
-su-exec appuser /app/start.sh
+su-exec appuser ash /app/start.sh
 
