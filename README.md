@@ -189,6 +189,20 @@ cat results.png | base64
 
 ### Results
 
-![Apache Bench explanation](./assets/images/test-health-endpoint-result.png)
+![Tests results](./assets/images/test-health-endpoint-result.png)
 
-@TDB Conclusion
+We get a mean latency of ~2.5ms per RTT. As the **waittime** is quasi-equal to the **ttime**, this may mean the actual additional network latency is negligible, and that using an actual sidecar should lead to the same results. However this is hypothetical as we can't compare to something that doesn't work yet.
+
+The raw results in .csv format are available in the `assets/data` directory.
+
+#### Explaining outliers
+
+Factoring in outliers, the max latency seems to cap out at ~30ms.
+
+![Tests results with outliers](./assets/images/test-health-endpoint-result-with-outliers.png)
+
+This is however easily explained when visualizing the data with time as an axis.
+
+![Tests results sorted by time](./assets/images/test-health-endpoint-result-requests-by-time.png)
+
+The sheer number of request is overloading the container. Using more CPU resources for the ACI should fix this.
