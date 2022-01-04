@@ -289,15 +289,6 @@ resource "azurerm_app_service" "nodeapp" {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
   }
   
-  logs {
-    application_logs {
-      file_system {
-        quota            = 35     # in Megabytes
-        retention_period = 7     # in days
-      }
-    }
-  }
-
   site_config {
     linux_fx_version = "DOCKER|dockerutils/dapr-on-ase-nodeapp:latest"
     always_on        = "true"
