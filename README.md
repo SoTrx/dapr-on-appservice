@@ -43,7 +43,7 @@ _App1_ is calling _App2_:
  **All settings required to make Dapr work with this specific configuration are listed within the [satcar README](/src/using-satcars/satcar)**
 
 
-### Demo app
+## Demo app
 To test this new workflow, a Pub/Sub demo app is used. This demo app is actually the [hello-docker-compose sample](https://github.com/dapr/samples/tree/master/hello-docker-compose) of the Dapr repository. 
 
 ![Demo App](./assets/images/demo-app.png)
@@ -61,7 +61,7 @@ Three custom apps are used in this demo :
 
 
 
-#### Running it locally
+### Running it locally
 To run the demo app locally, you must have Docker and make installed. Then run :
 ```sh
 # The OPTIMIZE flag can be set to 1. 
@@ -92,7 +92,7 @@ You can also push the nodeapp, pythonapp, satcar images to Dockerhub with the fo
 make push DOCKERHUB_USERNAME=<YOUR_DOCKERHUB_USENAME>
 ```
 
-#### Deploying it on azure 
+### Deploying it on azure 
 
 To deploy the app on Azure (using Terraform), use the following commands :
 ```sh
@@ -102,6 +102,57 @@ terraform apply
 
 The deployment will last 2 and a half hours or so (creating an ASE takes a long time). 
 
+### Configuration
+
+#### Consul as a DNS
+
+Going from the [Dapr Consul name resolution component spec](https://docs.dapr.io/reference/components-reference/supported-name-resolution/setup-nr-consul/), a working DNS configuration wan quickly be deduced :
+```yml
+# This file can be found in deploy/modules/demo/config/config.yaml.tpl
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: appconfig
+spec:
+  nameResolution:
+    component: "consul"
+    configuration:
+      client:
+          # This is the only variable that has to be manually filled in
+          address: "${CONSUL_HOST}:${CONSUL_PORT}"
+      # Consul doesn't need to register itself
+      selfRegister: false
+      queryOptions:
+        useCache: true
+      daprPortMetaKey: "DAPR_PORT"
+      # All the variables of this section are automatically filled by Dapr at runtime
+      advancedRegistration:
+        # Filled with the Appid given at daprd as a command line switch 
+        name: "${APP_ID}"
+        # Filled with the app port given at daprd as a command line switch 
+        port: ${APP_PORT}
+        # Filled with the **PRIVATE IP** of the container daprd is running in
+        address: "${HOST_ADDRESS}"
+        # Full control over health check, failing an health check will
+        # unregister the app from consul 
+        # check:
+        #   name: "Dapr Health Status"
+        #   checkID: "daprHealth:${APP_ID}"
+        #   interval: "15s"
+        #   http: "http://${HOST_ADDRESS}:${DAPR_HTTP_PORT}/v1.0/healthz"
+        meta:
+          DAPR_METRICS_PORT: "${DAPR_METRICS_PORT}"
+          DAPR_PROFILE_PORT: "${DAPR_PROFILE_PORT}"
+        tags:
+          - "dapr"
+```
+This config is mostly the default configuration. The `spec.nameResolution.configuration.client.adress` attribute is filled in by Terraform on deployment, all other variables are filled in at runtime by Dapr. 
+
+On a side-note, on this peculiar configuration Consul isn't registering itself as a DNS entry (`selfregister` attribute). This isn't a requirement for the solution to work properly, its just not needed has the sidecars will always resolves consul with its IP. 
+
+It should however be noted that, as the sidecars are running in a separate service from the app its supporting, some options have a slightly different meaning from usual :
+- `advancedRegistration.address` is **not** the main app address, it's the sidecar's. In an idiomatic sidecar deployment, the two addresses should be the same, but not in this case. Plus, Dapr is filling this attribute with the private IP of the service its running in. Although App Services running in an ASE do have a private address, requests using this address are blocked. Deploying Dapr directly on an ASE would require to change this attribute to resolve the FQDN of the container.
+- `advancedRegistration.check` is checking the container. In an usual deployment, the sidecar being healthy also attest the main app being healty. In this peculiar deployment, another check (multiple checks can be defined) could be added to actually check the main app state. 
 
 ## Viability and performance consideration
 
