@@ -154,6 +154,27 @@ It should however be noted that, as the sidecars are running in a separate servi
 - `advancedRegistration.address` is **not** the main app address, it's the sidecar's. In an idiomatic sidecar deployment, the two addresses should be the same, but not in this case. Plus, Dapr is filling this attribute with the private IP of the service its running in. Although App Services running in an ASE do have a private address, requests using this address are blocked. Deploying Dapr directly on an ASE would require to change this attribute to resolve the FQDN of the container.
 - `advancedRegistration.check` is checking the container. In an usual deployment, the sidecar being healthy also attest the main app being healty. In this peculiar deployment, another check (multiple checks can be defined) could be added to actually check the main app state. 
 
+#### Redis binding
+
+```yml
+# This file can be found in deploy/modules/demo/bindings/pubsub.yaml.tpl
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: ${REDIS_HOST}:${REDIS_PORT}
+  - name: redisPassword
+    value: ""
+```
+Redis is used in the demo application as both a state store and a Pub/Sub broker. It is however not impacted by the special way the sidecar are running. The host and port are simply filled in by Terraform at deployment time.
+
+
+
 ## Viability and performance consideration
 
 Externalizing sidecars might have a performance impact. Every HTTP call between a container and its sidecar is now not a simple localhost call anymore, but has to get in and out of the ASE. This part will try to quantify this impact.
