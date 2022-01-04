@@ -173,7 +173,35 @@ spec:
 ```
 Redis is used in the demo application as both a state store and a Pub/Sub broker. It is however not impacted by the special way the sidecar are running. The host and port are simply filled in by Terraform at deployment time.
 
+#### File share
 
+As stated earlier, an Azure file share is used a a volume mount to share the configuration/bindings between all the Dapr instance. The reason a File Share is used over a Blob or any other file storage solution is simply that this is the only solution supported by Container Instances. The configuration is mounted in the `/config` folder and bindings are mounted in the `/components` folder, as shown the Terraform below.  
+
+```terraform
+resource "azurerm_container_group" satcar-python"{
+ ...
+  container {
+    name   = "satcar-python"
+    ...
+    volume {
+      name                 = "components"
+      mount_path           = "/components"
+      read_only            = true
+      share_name           = var.dapr_components_share_name
+      storage_account_name = var.st_account_name
+      storage_account_key  = var.st_account_key
+    }
+    volume {
+      name                 = "config"
+      mount_path           = "/config"
+      read_only            = true
+      share_name           = var.dapr_config_share_name
+      storage_account_name = var.st_account_name
+      storage_account_key  = var.st_account_key
+    }
+  }
+}
+```
 
 ## Viability and performance consideration
 
