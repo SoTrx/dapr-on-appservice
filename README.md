@@ -4,7 +4,7 @@ The purpose of this repository is to include [Dapr](https://dapr.io/), in an [Az
 
 ## Considered solutions
 
-+ Using App Service built-in support for docker-compose (see subdirectory : @TDB)
++ Using App Service built-in support for docker-compose ([see subdirectory](/src/[KO]-using-docker-compose)):
     + **Advantages** : Very simple
     + **Result** : Numerous networking-related options aren't supported yet, reproducing a "sidecar-like" interaction is **not possible at the moment**
 
@@ -38,6 +38,9 @@ _App1_ is calling _App2_:
  + _satcar1_ is forwarding the request to _satcar2_ (using `GRPC only`)
  + _satcar2_ is forwarding the request to _App2_ (using `HTTP/GRPC` on __localhost:[EXPOSED_APP_PORT]__)
  + (The result goes all the way back to _App1_)
+
+
+ **All settings required to make Dapr work with this specific configuration are listed within the [satcar README](/src/using-satcars/satcar)**
 
 
 ### Demo app

@@ -1,0 +1,121 @@
+# Attempt at using a docker-compose file for Dapr in App Services.
+version: "3"
+services:
+  ############################
+  # Node app + Dapr sidecar
+  ############################
+
+  # Main app
+  nodeapp:
+    image: "dapronaseacr.azurecr.io/hello-nodeapp:latest"
+    # Ports are ignored, the GRPC won't work
+    ports:
+      - "50002:50002"
+    depends_on:
+      - redis
+      - placement
+    environment:
+      # We can't use network not services, so we have to modify the HOST
+      # from localhost to another that could be resolved in the default docker
+      # network
+      DAPR_HTTP_HOST: "nodeapp-dapr"
+
+  # Sidecar
+  nodeapp-dapr:
+    image: "dapronaseacr.azurecr.io/daprd:latest"
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "nodeapp",
+        "-app-port",
+        "3000",
+        "-placement-host-address",
+        "placement:50006",
+        "-dapr-grpc-port",
+        "50002",
+        "-components-path",
+        "/components",
+      ]
+      # Expose is also ignored
+    expose:
+      - 3500
+    environment:
+      # Used for volume mount
+      WEBSITES_ENABLE_APP_SERVICE_STORAGE: "TRUE"
+    # Dapr bindings
+    volumes:
+      - "dapr-components:/components"
+    # Depends_on is also ignored.
+    # However this is not a problem, dapr is waiting for its
+    # main app to start anyway
+    depends_on:
+      - nodeapp
+
+  ############################
+  # Python app + Dapr sidecar
+  # (same as nodeapp)
+  ############################
+
+  # Main app
+  pythonapp:
+    image: "dapronaseacr.azurecr.io/hello-pythonapp:latest"
+    depends_on:
+      - redis
+      - placement
+    environment:
+      DAPR_HTTP_HOST: "pythonapp-dapr"
+
+  # Sidecar
+  pythonapp-dapr:
+    image: "dapronaseacr.azurecr.io/daprd:latest"
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "pythonapp",
+        "-app-port",
+        "3000",
+        "-placement-host-address",
+        "placement:50006",
+        "-components-path",
+        "/components",
+      ]
+    expose:
+      - 3500
+    environment:
+      WEBSITES_ENABLE_APP_SERVICE_STORAGE: "TRUE"
+    volumes:
+      - "dapr-components:/components"
+    depends_on:
+      - pythonapp
+
+  ############################
+  # Dapr placement service
+  ############################
+  placement:
+    image: "dapronaseacr.azurecr.io/dapr:latest"
+    command: ["./placement", "-port", "50006"]
+    # Port ignored, this however can be circumvented by using the
+    # default docker network name resolution, not using "localhost"
+    # when resolving the placement service location but instead
+    # "placement". All ports should be open on the default network
+    ports:
+      - "50006:50006"
+
+  ############################
+  # Redis state store
+  ############################
+  redis:
+    # Ditto placement, port ignored, resolved by using "redis"
+    image: "dapronaseacr.azurecr.io/redis:alpine"
+
+# Using a volume to share the Dapr bindings between sidecars
+# without copying them over and over again
+volumes:
+  dapr-components:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./components
+      o: bind
