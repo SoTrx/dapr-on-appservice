@@ -8,7 +8,7 @@ The purpose of this repository is to include [Dapr](https://dapr.io/), in an [Az
     + **Advantages** : Very simple
     + **Result** : Numerous networking-related options aren't supported yet, reproducing a "sidecar-like" interaction is **not possible at the moment**
 
-+ Making the main app process launch the Dapr runtime (daprd) (see subdirectory : @TDB) 
++ Making the main app process launch the Dapr runtime (daprd) ([see subdirectory](/src/[KO]-using-embedded-dapr))
     + **Advantages** : Compatible with non-containerized workloads 
     + **Result** : Although the "sidecar" is working, ASE does not allow for HTTP/2.0 (what GRPC is based on). However, in Dapr, Sidecar to sidecar communication must be over GRPC. Thus, **this won't work at the moment**.
 

@@ -9,7 +9,6 @@ deploy/modules/demo/**/*.yaml
 **/*.terraform.lock.hcl
 
 # Ignore not ready subprojects
-src/embedded-dapr
 src/placement
 **/notes.txt
 src/using-satcars/lantency-measurer

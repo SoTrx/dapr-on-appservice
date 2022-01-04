@@ -1,0 +1,25 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: appconfig
+spec:
+  nameResolution:
+    component: "consul"
+    configuration:
+      client:
+          address: "192.168.251.7:8500"
+      selfRegister: false
+      queryOptions:
+        useCache: true
+      daprPortMetaKey: "DAPR_PORT"
+      advancedRegistration:
+        name: "${APP_ID}"
+        port: ${APP_PORT}
+        address: "${APP_ID}.dapr-on-external-ase.p.azurewebsites.net"
+        meta:
+          DAPR_METRICS_PORT: "${DAPR_METRICS_PORT}"
+          DAPR_PROFILE_PORT: "${DAPR_PROFILE_PORT}"
+          DAPR_PORT: "443"
+
+        tags:
+          - "dapr"
