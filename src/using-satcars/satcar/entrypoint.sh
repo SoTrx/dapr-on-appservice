@@ -58,7 +58,7 @@ su-exec appuser /app/daprd \
 -components-path "/components" \
 -log-level debug \
 -app-id ${APP_ID:-pythonapp} \
--app-port "${APP_PORT:-80}" \
+-app-port "${APP_PORT:-443}" \
 ${OPTIONAL_ARGS}
 
 #/app/daprd -dapr-internal-grpc-port "5555" -log-level debug -app-id ${APP_ID:-pythonapp} -app-port "${APP_PORT:-80}" -placement-host-address "${PLACEMENT_HOST:-localhost}":"${PLACEMENT_PORT:-50006}"
