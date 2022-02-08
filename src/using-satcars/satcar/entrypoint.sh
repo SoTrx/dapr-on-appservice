@@ -42,16 +42,18 @@ echo "Now starting satcar for ${APP_ID} (${APP_HOST}:${APP_PORT:-80}). Placement
 envsubst '${APP_HOST} ${APP_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 retryNginx&
 
+OPTIONAL_ARGS=""
 # Only pass the placement service arg to Daprd if the variables are defined
 # Although this won't stop daprd, a lot of useless warning would be thrown otherwise
-OPTIONAL_ARGS="-placement-host-address ${PLACEMENT_HOST}:${PLACEMENT_PORT}"
+PLACEMENT_ARG="-placement-host-address ${PLACEMENT_HOST}:${PLACEMENT_PORT}"
 if [[ -z ${PLACEMENT_HOST}] || -z ${PLACEMENT_PORT} ]]; then
     echo "PLACEMENT_HOST or PLACEMENT_PORT is not defined, placement service won't be used."
-    OPTIONAL_ARGS=""
 else
     echo "Placement service is ${PLACEMENT_HOST}:${PLACEMENT_PORT}"
+    OPTIONAL_ARGS="${OPTIONAL_ARGS} ${PLACEMENT_ARG}"
 fi
 
+#TODO: -app-ssl option (https://docs.dapr.io/reference/arguments-annotations-overview/)
 su-exec appuser /app/daprd \
 -config /config/config.yaml \
 -dapr-internal-grpc-port "5555" \

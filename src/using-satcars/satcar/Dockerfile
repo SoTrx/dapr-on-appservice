@@ -26,8 +26,12 @@ COPY nginx.conf /etc/nginx/nginx.conf.template
 COPY --chmod=500 --chown=root:root entrypoint.sh /app/
 # COPY components /components
 # gettext is the apk package containing envsubst used in the entrypoint
-RUN apk add --no-cache gettext nginx su-exec &&\
-    adduser -HD -s /bin/ash appuser
+RUN apk add --no-cache gettext dos2unix nginx su-exec &&\
+    adduser -HD -s /bin/ash appuser &&\
+    # Convert the file to a UNIX style formatting, useful if the host building the container
+    # is a Windows machine.
+    dos2unix entrypoint.sh
+
 COPY --from=dapr-downloader --chmod=0500 --chown=appuser:appuser /app/daprd .
 ENTRYPOINT [ "/app/entrypoint.sh" ]
 
